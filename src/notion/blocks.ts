@@ -11,6 +11,10 @@ export type BlockWithoutChildren = Exclude<
 export type RichText = (Block & {
   type: 'paragraph';
 })['paragraph']['rich_text'][number];
+export type EmojiRequest = ((Block & {
+  object: 'block';
+  type: 'callout';
+})['callout']['icon'] & {type: 'emoji'})['emoji'];
 
 export function divider(): Block {
   return {
@@ -191,8 +195,8 @@ export function equation(value: string): Block {
 
 export function callout(
   text: RichText[] = [],
-  emoji = '👍',
-  color = 'default',
+  emoji: EmojiRequest = '👍',
+  color: supportedCalloutColor = 'default',
   children: Block[] = []
 ): Block {
   return {
@@ -202,12 +206,10 @@ export function callout(
       rich_text: text.length ? text : [richText('')],
       icon: {
         type: 'emoji',
-        // @ts-expect-error Notion API accepts emoji strings but types are not exported
         emoji,
       },
-      color: color as supportedCalloutColor,
-      // @ts-expect-error Typings are not perfect
-      children,
+      color,
+      children: children.length ? children : undefined,
     },
   };
 }
